@@ -1,0 +1,74 @@
+# To improve query performance, we strongly suggest adding indexes to any field that you plan to filter or sort by
+# Add the `@index` or `@index(unique: true)` annotation after any non-key field
+# https://academy.subquery.network/build/graphql.html#indexing-by-non-primary-key-field
+
+# type Block @entity {
+#   id: ID! # The block hash
+#   height: BigInt!
+# }
+
+type Transaction @entity {
+  "{blockHeight}-{index in block}"
+  id: ID!
+
+  "Block height that we inserted in database"
+  blockHeight: Int!
+
+  "Block timestamp"
+  timestamp: BigInt!
+
+  "success or failed"
+  status: String!
+
+  "Chain id i.e injective-1"
+  chainId: String!
+
+  "Amount of gas being used at tx execution"
+  gasUsed: BigInt!
+}
+
+type TransferEvent @entity {
+  id: ID!
+  blockHeight: BigInt!
+  txHash: String!
+  recipient: String!
+  sender: String!
+  amount: String!
+}
+
+type Message @entity {
+  id: ID!
+  blockHeight: Int!
+  txHash: String!
+  from: String!
+  to: String!
+  amount: String!
+  chainId: String!
+}
+
+type Token @entity {
+  id: ID!
+  issuer: String!
+  symbol: String!
+  subunit: String!
+  precision: Int!
+  initialAmount: String!
+  description: String!
+  features: String!
+  burnRate: String!
+  sendCommissionRate: String!
+  chainId: String!
+}
+
+type TokenTransfer @entity {
+  id: ID!
+  blockHeight: Int!
+  txHash: String!
+  from: String!
+  to: String!
+  amount: String!
+  chainId: String!
+  token: Token!
+  gasUsed: BigInt!
+  status: String!
+}

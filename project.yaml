@@ -1,0 +1,69 @@
+specVersion: 1.0.0
+name: coreum-subql
+version: 0.0.1
+runner:
+  node:
+    name: '@subql/node-cosmos'
+    version: '*'
+  query:
+    name: '@subql/query'
+    version: '*'
+description: >-
+  Coreum subql indexer
+repository: 'https://github.com/web3query/coreum-subql'
+schema:
+  file: ./schema.graphql
+network:
+  chainId: coreum-testnet-1
+  # This endpoint must be a public non-pruned archive node
+  # We recommend providing more than one endpoint for improved reliability, performance, and uptime
+  # Public nodes may be rate limited, which can affect indexing speed
+  # When developing your project we suggest getting a private API key
+  endpoint: ['https://full-node.testnet-1.coreum.dev:26657']
+  # Optionally provide the HTTP endpoint of a full chain dictionary to speed up processing
+  # dictionary: 'https://api.subquery.network/sq/subquery/cosmos-hub-dictionary'
+  chainTypes:
+    cosmos.bank.v1beta1:
+      file: ./proto/cosmos/bank/v1beta1/tx.proto
+      messages:
+        - MsgSend
+    cosmos.base.v1beta1.Coin:
+      file: ./proto/cosmos/base/v1beta1/coin.proto
+      messages:
+        - Coin
+    coreum.asset.ft.v1:
+      file: ./proto/coreum/asset/ft/v1/tx.proto
+      messages:
+        - MsgIssue
+    coreum.asset.ft.v1.Token:
+      file: ./proto/coreum/asset/ft/v1/token.proto
+      messages:
+        - Token
+        - Feature
+        - Definition
+
+dataSources:
+  - kind: cosmos/Runtime
+    startBlock: 5978959
+    mapping:
+      file: ./dist/index.js
+      handlers:
+        # Using block handlers slows your project down as they can be executed with each and every block. Only use if you need to
+        - handler: handleBlock
+          kind: cosmos/BlockHandler
+        - handler: handleTokenIssuance
+          kind: cosmos/MessageHandler
+          filter:
+            type: /coreum.asset.ft.v1.MsgIssue
+        # Using transaction handlers without filters slows your project down as they can be executed with each and every block
+        # - handler: handleTransaction
+        # - handler: handleEvent
+        #   kind: cosmos/EventHandler
+        #   filter:
+        #     type: transfer
+        #     messageFilter:
+        #       type: /cosmos.bank.v1beta1.MsgSend
+        - handler: handleTransferMessage
+          kind: cosmos/MessageHandler
+          filter:
+            type: /cosmos.bank.v1beta1.MsgSend
