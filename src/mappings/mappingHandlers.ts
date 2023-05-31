@@ -33,13 +33,13 @@ type IssueMsg = {
 }
 
 export async function handleTokenIssuance(msg: CosmosMessage<IssueMsg>): Promise<void> {
-  logger.info(`${JSON.stringify(msg.msg.decodedMsg)}`)
   const { subunit, features, issuer } = msg.msg.decodedMsg
   const token = Token.create({
     id: `${subunit}-${issuer}`,
     ...msg.msg.decodedMsg,
     features: JSON.stringify(features),
     chainId: msg.block.header.chainId,
+    timestamp: BigInt(msg.block.block.header.time.valueOf()),
   })
   await token.save()
 }
@@ -66,7 +66,7 @@ type TransferMsg = {
 }
 
 export async function handleTransferMessage(msg: CosmosMessage<TransferMsg>): Promise<void> {
-  const { height, chainId } = msg.block.block.header
+  const { height, chainId, time } = msg.block.block.header
 
   const { amount } = msg.msg.decodedMsg
 
@@ -94,6 +94,7 @@ export async function handleTransferMessage(msg: CosmosMessage<TransferMsg>): Pr
       tokenId: token.id,
       status: msg.tx.tx.code === 0 ? 'success' : 'failed',
       gasUsed: BigInt(msg.tx.tx.gasUsed),
+      timestamp: BigInt(time.valueOf()),
     })
     await tokenTransfer.save()
   }

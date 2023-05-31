@@ -47,6 +47,7 @@ type Message @entity {
 }
 
 type Token @entity {
+  "{subunit}-{issuer}"
   id: ID!
   issuer: String!
   symbol: String!
@@ -58,11 +59,13 @@ type Token @entity {
   burnRate: String!
   sendCommissionRate: String!
   chainId: String!
+  timestamp: BigInt!
 }
 
 type TokenTransfer @entity {
   id: ID!
   blockHeight: Int!
+  timestamp: BigInt!
   txHash: String!
   from: String!
   to: String!
